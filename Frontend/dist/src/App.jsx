@@ -66,7 +66,7 @@
 
 // src/App.jsx
 import React from "react";
-import Router from "./router/Router"; // Your custom router logic
+import Router from "./router/Router"; 
 
 function App() {
   return <Router />;

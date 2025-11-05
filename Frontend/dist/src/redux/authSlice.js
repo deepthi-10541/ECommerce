@@ -1,71 +1,26 @@
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// import axios from "axios";
-
-// // login action
-// export const loginUser = createAsyncThunk(
-//   "auth/login",
-//   async ({ username, password }) => {
-//     const { data } = await axios.post("http://localhost:8000/api/login/", {
-//       username,
-//       password,
-//     });
-//     localStorage.setItem("user", JSON.stringify(data.user));
-//     localStorage.setItem("token", data.token);
-//     return data.user;
-//   }
-// );
-// const authSlice = createSlice({
-//   name: "auth",
-//   initialState: {
-//     user: JSON.parse(localStorage.getItem("user")) || null,
-//     loading: false,
-//     error: null,
-//   },
-//   reducers: {
-//     logout: (state) => {
-//       state.user = null;
-//       localStorage.clear();
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(loginUser.pending, (state) => {
-//         state.loading = true;
-//         state.error = null;
-//       })
-//       .addCase(loginUser.fulfilled, (state, action) => {
-//         state.loading = false;
-//         state.user = action.payload;
-//       })
-//       .addCase(loginUser.rejected, (state) => {
-//         state.loading = false;
-//         state.error = "Invalid credentials";
-//       });
-//   },
-// });
-
-// export const { logout } = authSlice.actions;
-// export default authSlice.reducer;
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import apiList from "../../api.json";
 
-// ---------- LOGIN THUNK ----------
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const loginUser = createAsyncThunk(
   "auth/login",
   async ({ username, password }, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post("http://localhost:8000/api/login/", {
+      // ✅ Build API endpoint dynamically
+      const loginEndpoint = `${API_URL}${apiList.auth.login}`;
+
+      const { data } = await axios.post(loginEndpoint, {
         username,
         password,
       });
 
-      // Store tokens in localStorage
+      // ✅ Store tokens & username in localStorage
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
       localStorage.setItem("username", username);
 
-      // Return username to Redux
       return { username };
     } catch (err) {
       if (err.response && err.response.data.non_field_errors) {
@@ -79,11 +34,10 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// ---------- AUTH SLICE ----------
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: localStorage.getItem("username") || null, // NO JSON.parse for plain string
+    user: localStorage.getItem("username") || null,
     loading: false,
     error: null,
   },
