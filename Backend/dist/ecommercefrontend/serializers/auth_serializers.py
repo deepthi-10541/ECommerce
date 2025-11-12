@@ -26,6 +26,8 @@ class SendOTPSerializer(serializers.Serializer):
 
 
 
+
+
 # ---------- 2. Verify OTP Serializer ----------
 class VerifyOTPSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=15)
@@ -45,7 +47,7 @@ class VerifyOTPSerializer(serializers.Serializer):
         
         return user 
 
-# ---------- 🆕 3. Complete Profile/Sign-up Serializer ----------
+# ---------- 3. Complete Profile/Sign-up Serializer ----------
 class ProfileCompleteSerializer(serializers.ModelSerializer):
     # Full Name fields are inherited from AbstractUser (first_name, last_name)
     class Meta:
