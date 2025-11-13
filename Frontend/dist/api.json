@@ -1,5 +1,8 @@
 {
-    "auth":{
-        "login":"/api/login/"
-    }
+  "auth": {
+    "send_otp": "/send-otp/",
+    "verify_otp": "/verify-otp/"
+  }
 }
+
+

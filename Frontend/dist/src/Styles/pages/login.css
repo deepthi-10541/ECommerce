@@ -206,6 +206,15 @@
 .signup-link a:hover {
   text-decoration: underline;
 }
+.input-error {
+  color: red;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  text-align: left;
+  /* padding-left: 40px;  */
+}
+
 
 /* Responsive */
 @media (max-width: 900px) {
