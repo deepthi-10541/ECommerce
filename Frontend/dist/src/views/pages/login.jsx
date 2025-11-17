@@ -1,105 +1,255 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../redux/authSlice";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
-// import { faFacebookF, faTwitter, faGoogle } from "@fortawesome/free-brands-svg-icons";
-import "../../Styles/pages/login.css";
-// import Shopping from '../../assets/images/Shopping.png';
-import shoppingcart from '../../assets/images/shoppingcart.png';
-const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+// import React, { useState, useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { sendOtp, verifyOtp } from "../../redux/authSlice";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faPhone, faKey } from "@fortawesome/free-solid-svg-icons";
+// import "../../Styles/pages/login.css";
+// import shoppingcart from "../../assets/images/shoppingcart.png";
+// import { useNavigate } from "react-router-dom";
 
-  const handleSubmit = async (e) => {
+// const Login = () => {
+//   const [phone, setPhone] = useState("");
+//   const [otp, setOtp] = useState("");
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+
+//   const { loading, error, otpSent, user } = useSelector((state) => state.auth);
+
+//   // ✅ Redirect to home after successful OTP verification
+//   useEffect(() => {
+//     if (user) {
+//       navigate("/home"); // Change to your actual dashboard/home route
+//     }
+//   }, [user, navigate]);
+
+//   const handleSendOtp = async (e) => {
+//     e.preventDefault();
+//     if (!phone.match(/^\d{10}$/)) {
+//       alert("Please enter a valid 10-digit phone number");
+//       return;
+//     }
+//     await dispatch(sendOtp(phone));
+//   };
+
+//   const handleVerifyOtp = async (e) => {
+//     e.preventDefault();
+//     if (otp.trim().length === 0) {
+//       alert("Please enter OTP");
+//       return;
+//     }
+//     await dispatch(verifyOtp({ phoneNumber: phone, otp }));
+//   };
+
+//   return (
+//     <div className="login-container">
+//       {/* LEFT SIDE */}
+//       <div className="login-left">
+//         <div className="left-content">
+//           <h1>
+//             Shop Everything <br /> You <span>Love</span> in One Place
+//           </h1>
+//           <p>
+//             Discover groceries, fashion, snacks, and more — all delivered to your doorstep.
+//             Experience convenience like never before with our trusted online store.
+//           </p>
+//           <div className="left-illustration">
+//             <img src={shoppingcart} alt="shopping" className="illustration-img" />
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* RIGHT SIDE */}
+//       <div className="login-right">
+//         <div className="login-card">
+//           <h2 className="login-title">Welcome Back</h2>
+//           <p className="login-subtitle">
+//             {otpSent ? "Enter the OTP sent to your phone" : "Login with your phone number"}
+//           </p>
+
+//           <form
+//             onSubmit={otpSent ? handleVerifyOtp : handleSendOtp}
+//             className="login-form"
+//           >
+//             {/* Phone Number Input */}
+//             <div className="input-group">
+//               <FontAwesomeIcon icon={faPhone} className="input-icon" />
+//               <input
+//                 type="tel"
+//                 placeholder="Enter phone number"
+//                 value={phone}
+//                 onChange={(e) => setPhone(e.target.value)}
+//                 required
+//                 disabled={otpSent}
+//               />
+//             </div>
+
+//             {/* OTP Input */}
+//             {otpSent && (
+//               <div className="input-group">
+//                 <FontAwesomeIcon icon={faKey} className="input-icon" />
+//                 <input
+//                   type="text"
+//                   placeholder="Enter OTP"
+//                   value={otp}
+//                   onChange={(e) => setOtp(e.target.value)}
+//                   required
+//                 />
+//               </div>
+//             )}
+
+//             <button type="submit" className="login-button" disabled={loading}>
+//               {loading
+//                 ? otpSent
+//                   ? "Verifying..."
+//                   : "Sending OTP..."
+//                 : otpSent
+//                 ? "Verify OTP"
+//                 : "Send OTP"}
+//             </button>
+
+//             {error && <div className="error-message">{error}</div>}
+//           </form>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Login;
+
+
+
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { sendOtp, verifyOtp } from "../../redux/authSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPhone, faKey } from "@fortawesome/free-solid-svg-icons";
+import "../../Styles/pages/login.css";
+import shoppingcart from "../../assets/images/shoppingcart.png";
+import { useNavigate } from "react-router-dom";
+
+const Login = () => {
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [localError, setLocalError] = useState(""); // 👈 for client-side validation errors
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { loading, error, otpSent, user } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    await dispatch(loginUser({username, password }));
+
+    // Local validation error
+    if (!phone.match(/^\d{10}$/)) {
+      setLocalError("Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    setLocalError("");
+    await dispatch(sendOtp(phone));
   };
 
-  const SocialIconLink = ({ icon, brandClass }) => (
-    <a href="#!" className={`social-icon ${brandClass}`}>
-      <FontAwesomeIcon icon={icon} />
-    </a>
-  );
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+
+    if (otp.trim().length === 0) {
+      setLocalError("Please enter the OTP");
+      return;
+    }
+
+    setLocalError("");
+    await dispatch(verifyOtp({ phoneNumber: phone, otp }));
+  };
 
   return (
     <div className="login-container">
-      {/* LEFT SIDE - Store Theme */}
+      {/* LEFT SIDE */}
       <div className="login-left">
         <div className="left-content">
           <h1>
             Shop Everything <br /> You <span>Love</span> in One Place
           </h1>
           <p>
-            Discover groceries, fashion, snacks, and more — all delivered to your doorstep. 
-            Experience convenience like never before with our trusted online store.
+            Discover groceries, fashion, snacks, and more — all delivered to your
+            doorstep. Experience convenience like never before with our trusted
+            online store.
           </p>
           <div className="left-illustration">
-            <img
-              src={shoppingcart}
-              alt="shopping"
-              className="illustration-img"
-            />
+            <img src={shoppingcart} alt="shopping" className="illustration-img" />
           </div>
         </div>
       </div>
 
-      {/* RIGHT SIDE - Login Card */}
+      {/* RIGHT SIDE */}
       <div className="login-right">
         <div className="login-card">
           <h2 className="login-title">Welcome Back</h2>
-          <p className="login-subtitle">Login to continue shopping</p>
+          <p className="login-subtitle">
+            {otpSent ? "Enter the OTP sent to your phone" : "Login with your phone number"}
+          </p>
 
-          <form onSubmit={handleSubmit} className="login-form">
+          <form
+            onSubmit={otpSent ? handleVerifyOtp : handleSendOtp}
+            className="login-form"
+          >
+            {/* Phone Number Input */}
             <div className="input-group">
-              <FontAwesomeIcon icon={faUser} className="input-icon" />
+              <FontAwesomeIcon icon={faPhone} className="input-icon" />
               <input
-                type="text"
-                placeholder="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="tel"
+                placeholder="Enter phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
+                disabled={otpSent}
               />
             </div>
 
-            <div className="input-group">
-              <FontAwesomeIcon icon={faLock} className="input-icon" />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* 🔴 Error message for phone number */}
+            {(!otpSent && (localError || error)) && (
+              <div className="error-message">
+                {localError || error}
+              </div>
+            )}
 
-            {/* <div className="forgot-password">
-              <a href="#!">Forgot password?</a>
-            </div> */}
+            {/* OTP Input */}
+            {otpSent && (
+              <>
+                <div className="input-group">
+                  <FontAwesomeIcon icon={faKey} className="input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* 🔴 Error message for OTP */}
+                {otpSent && error && (
+                  <div className="error-message">{error}</div>
+                )}
+              </>
+            )}
 
             <button type="submit" className="login-button" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
+              {loading
+                ? otpSent
+                  ? "Verifying..."
+                  : "Sending OTP..."
+                : otpSent
+                ? "Verify OTP"
+                : "Send OTP"}
             </button>
-
-            {error && <div className="error-message">{error}</div>}
           </form>
-
-          {/* <div className="social-login">
-            <p>Or login with</p>
-            <div className="social-icons">
-              <SocialIconLink icon={faFacebookF} brandClass="facebook" />
-              <SocialIconLink icon={faTwitter} brandClass="twitter" />
-              <SocialIconLink icon={faGoogle} brandClass="google" />
-            </div>
-          </div> */}
-
-          {/* <div className="signup-link">
-            <p>
-              Don’t have an account? <a href="#!">Sign Up</a>
-            </p>
-          </div> */}
         </div>
       </div>
     </div>
