@@ -4,11 +4,12 @@ from ecommercefrontend.views.product_views import ProductListView, ProductDetail
 
 urlpatterns = [
     # GET: /products/list/ (Electronics excluded)
-    path('products/list/', ProductListView.as_view(), name='product_list'),
+    path('products/list/', ProductListView.as_view()),
     
     # GET: /products/categories/
-    path('products/categories/', CategoryListView.as_view(), name='category_list'), # 🆕 Category List
+    path('products/categories/', CategoryListView.as_view()), # Category List
     
     # GET: /products/<id>/
-    path('products/<int:pk>/', ProductDetailView.as_view(), name='product_detail'),
+    path('products/<int:pk>/', ProductDetailView.as_view()),
 ]
+ 
