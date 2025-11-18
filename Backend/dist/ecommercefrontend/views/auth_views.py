@@ -79,6 +79,7 @@ class ProfileCompleteView(generics.UpdateAPIView):
     serializer_class = ProfileCompleteSerializer 
     
     def get_object(self):
+        
         return self.request.user 
 
     def put(self, request, *args, **kwargs):
