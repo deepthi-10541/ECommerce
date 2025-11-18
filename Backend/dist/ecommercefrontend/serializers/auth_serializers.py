@@ -7,20 +7,55 @@ from ..models import User
 #     phone = serializers.CharField(max_length=10)
 
 
+# class SendOTPSerializer(serializers.Serializer):
+#     phone = serializers.CharField(max_length=10)
+
+#     def validate_phone(self, value):
+#         phone_number = value.replace(' ', '').replace('-', '') 
+
+#         if not (10 <= len(phone_number) <= 15):
+#              raise serializers.ValidationError("Phone number length is invalid.")
+
+#         if not phone_number.isdigit() and not phone_number.startswith('+'):
+#             raise serializers.ValidationError("Phone number must contain only digits (and optionally a leading '+').")
+        
+#         if len(set(phone_number)) < 3:
+#             raise serializers.ValidationError("Please provide a valid phone number.")
+
+#         return phone_number
+
+
+
+# import re
+
 class SendOTPSerializer(serializers.Serializer):
-    phone = serializers.CharField(max_length=10)
+    phone = serializers.CharField(max_length=15) 
 
     def validate_phone(self, value):
+        
         phone_number = value.replace(' ', '').replace('-', '') 
 
         if not (10 <= len(phone_number) <= 15):
              raise serializers.ValidationError("Phone number length is invalid.")
-
-        if not phone_number.isdigit() and not phone_number.startswith('+'):
-            raise serializers.ValidationError("Phone number must contain only digits (and optionally a leading '+').")
         
-        if len(set(phone_number)) < 3:
-            raise serializers.ValidationError("Please provide a valid phone number.")
+        numeric_part = phone_number.lstrip('+') 
+        if not numeric_part.isdigit():
+             raise serializers.ValidationError("Phone number must contain only digits (and optionally a leading '+').")
+        
+        if len(set(phone_number)) < 3: 
+             raise serializers.ValidationError("Please provide a valid phone number.")
+
+        
+        if phone_number.startswith('+91') and (len(phone_number) == 13):
+            local_number = phone_number[3:]
+        elif len(phone_number) == 10:
+            local_number = phone_number
+        else:
+            raise serializers.ValidationError("Only 10-digit Indian numbers or numbers starting with +91 are accepted.")
+
+
+        if len(local_number) != 10 or local_number[0] not in ['6', '7', '8', '9']:
+            raise serializers.ValidationError("Only valid 10-digit Indian mobile numbers (starting with 6, 7, 8, or 9) are accepted.")
 
         return phone_number
 
