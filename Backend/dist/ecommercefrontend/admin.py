@@ -20,6 +20,12 @@ class UserAdmin(BaseUserAdmin):
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
+    add_fieldsets = (
+        (None, {
+            'classes':('wide',),
+            'fields':('phone','password1','password2','is_staff','is_active'),
+        }),
+    )
 
 # 2.we can register model here
 admin.site.register(User, UserAdmin)
