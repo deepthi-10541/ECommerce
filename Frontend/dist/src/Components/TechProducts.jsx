@@ -16,7 +16,6 @@ function TechProducts() {
           axios.get("https://dummyjson.com/products/category/laptops"),
         ]);
 
-        // Combine both categories into one array
         const combinedData = [
           ...smartphones.data.products,
           ...laptops.data.products,

@@ -6,7 +6,7 @@ function Fruits() {
   const [items, setItems] = useState([]);
   const [showAll, setShowAll] = useState(false);
 
-  // const colors = ["#ddeffbff", "#c6ffb1ff", "#d3d3d3"]; // repeating colors
+  
   const colors=['white'];
 
   useEffect(() => {

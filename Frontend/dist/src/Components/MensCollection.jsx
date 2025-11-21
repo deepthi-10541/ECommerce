@@ -17,7 +17,7 @@ function MensCollection() {
           axios.get("https://dummyjson.com/products/category/mens-watches"),
         ]);
 
-        // Combine all 3 category products into one array
+       
         const combinedData = [
           ...shirts.data.products,
           ...shoes.data.products,
@@ -53,7 +53,6 @@ function MensCollection() {
         )}
       </div>
 
-      {/* Row that fills the viewport width */}
       <div className="mens-row">
         {initialCards.map((item, index) => (
           <div
@@ -71,7 +70,6 @@ function MensCollection() {
         ))}
       </div>
 
-      {/* Remaining cards shown when “See All” is clicked */}
       {showAll && remainingCards.length > 0 && (
         <div className="mens-grid">
           {remainingCards.map((item, index) => (
