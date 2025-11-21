@@ -4,7 +4,7 @@ from django.urls import path
 from ecommercefrontend.views.auth_views import SendOTPView, VerifyOTPView, HomeView, ProfileCompleteView 
 
 urlpatterns = [
-    # ✅ CORRECT: Using View classes (.as_view())
+    # CORRECT: Using View classes (.as_view())
     path('send-otp/', SendOTPView.as_view()),
     path('verify-otp/', VerifyOTPView.as_view()),
     

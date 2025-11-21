@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin # 👈 AbstractUser ను AbstractBaseUser & BaseUserManager గా మార్చాం
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin # 👈 AbstractUser to AbstractBaseUser & BaseUserManager has changed
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -81,11 +81,23 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2) 
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    # Set to null=True to allow existing products to have a NULL value during migration
+    product_code = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    discount_percent = models.PositiveIntegerField(default=0) # 0 to 100 
+    
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def discount_price(self):
+        # Discount Calculation Logic
+        if self.discount_percent is not None and self.discount_percent > 0:
+            discount_amount = self.price * (self.discount_percent / 100)
+            return self.price - discount_amount
+        return self.price
+
     def __str__(self):
         return self.name
+    
 
 # --- 5. Cart, CartItem Models ---
 class Cart(models.Model):

@@ -20,7 +20,7 @@ from django.urls import path, include
 from django.contrib import admin
 
 urlpatterns = [
-    # 👇 Admin Panel కోసం ఈ లైన్ తప్పనిసరి
+
     path('admin/', admin.site.urls),
     # Auth URLs (Includes Send OTP, Verify OTP)
     path('', include('ecommercefrontend.urls.auth_urls')),
@@ -28,7 +28,7 @@ urlpatterns = [
     # Product URLs (unchanged from last time)
     path('', include('ecommercefrontend.urls.product_urls')),
     
-    # 🆕 Cart URLs
+    # Cart URLs
     path('', include('ecommercefrontend.urls.cart_urls')),
 ]
 

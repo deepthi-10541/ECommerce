@@ -27,9 +27,49 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
-# 2.we can register model here
+
+# Product Model Admin
+class ProductAdmin(admin.ModelAdmin):
+    list_display = (
+        'name', 'category', 'price', 'discount_percent', 'discounted_price_display', 'is_available'
+    )
+    list_filter = ('category', 'is_available')
+    search_fields = ('name', 'description')
+    
+    # discount_percent based amount can display
+    readonly_fields = ('discounted_price_display',) 
+
+    def discounted_price_display(self, obj):
+        return obj.discount_price()
+    discounted_price_display.short_description = 'Discounted Price'
+    
+    fieldsets = (
+        (None, {'fields': ('name', 'description', 'category', 'image', 'product_code')}),
+        ('Pricing & Stock', {'fields': ('price', 'discount_percent', 'discounted_price_display', 'is_available')}),
+    )
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    extra = 0
+    readonly_fields = ('total_price',)
+    
+    # CartItems total amount
+    def total_price(self, obj):
+        return obj.total_price()
+    total_price.short_description = 'Total Price'
+
+
+# Cart Model Admin (Inline)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'is_active', 'created_at')
+    list_filter = ('is_active',)
+    search_fields = ('user__phone',)
+    inlines = [CartItemInline] # CartItem can we display here
+
+
+
+#  Registering the Models
 admin.site.register(User, UserAdmin)
 admin.site.register(Category)
-admin.site.register(Product)
-admin.site.register(Cart)
+admin.site.register(Product, ProductAdmin) # ProductAdmin
+admin.site.register(Cart, CartAdmin)       # CartAdmin
 admin.site.register(CartItem)

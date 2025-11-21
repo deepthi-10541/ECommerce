@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from ..models import Cart, CartItem, Product
 from ..serializers.cart_serializers import CartSerializer, AddToCartSerializer
 
-# ---------- 🆕 Add To Cart View (with Profile Check) ----------
+# ----------Add To Cart View (with Profile Check) ----------
 class AddToCartView(generics.GenericAPIView):
     serializer_class = AddToCartSerializer
     permission_classes = [IsAuthenticated] 
@@ -14,7 +14,7 @@ class AddToCartView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         
-        # ⚠️ Profile Completion Restriction Check 
+        # Profile Completion Restriction Check 
         if not user.is_profile_complete:
             return Response(
                 {"detail": "Profile incomplete. Please update your profile (address, name, etc.) before adding products to cart."},
@@ -45,7 +45,7 @@ class AddToCartView(generics.GenericAPIView):
         return Response(cart_serializer.data, status=status.HTTP_200_OK)
 
 
-# ---------- 🆕 View/Retrieve Cart ----------
+# ----------View/Retrieve Cart ----------
 class CartDetailView(generics.RetrieveAPIView):
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]

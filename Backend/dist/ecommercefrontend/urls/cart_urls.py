@@ -6,5 +6,5 @@ urlpatterns = [
     # POST: /api/cart/add/
     path('cart/add/', AddToCartView.as_view()),
     # GET: /api/cart/details/
-    path('cart/details/', CartDetailView.as_view()),
+    path('details/', CartDetailView.as_view()),
 ]
