@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Category, Product, Cart, CartItem 
+from .models import User, Category, Product, Cart, CartItem,SubCategory 
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 # 1. Custom User Model can register
@@ -31,22 +31,25 @@ class UserAdmin(BaseUserAdmin):
 # Product Model Admin
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'category', 'price', 'discount_percent', 'discounted_price_display', 'is_available'
+        'name', 'category', 'sub_category', 'price', 'discount_percent', 'discounted_price_display', 'is_available'
     )
-    list_filter = ('category', 'is_available')
-    search_fields = ('name', 'description')
+    list_filter = ('category', 'sub_category', 'is_available')
+    search_fields = ('name', 'description', 'product_code')
     
-    # discount_percent based amount can display
     readonly_fields = ('discounted_price_display',) 
 
     def discounted_price_display(self, obj):
         return obj.discount_price()
     discounted_price_display.short_description = 'Discounted Price'
     
-    fieldsets = (
-        (None, {'fields': ('name', 'description', 'category', 'image', 'product_code')}),
-        ('Pricing & Stock', {'fields': ('price', 'discount_percent', 'discounted_price_display', 'is_available')}),
-    )
+    # fieldsets = (
+    #     # sub_category fields
+    #     (None, {'fields': ('name', 'description', 'category', 'sub_category', 'image', 'product_code')}), 
+    #     ('Pricing & Stock', {'fields': ('price', 'discount_percent', 'discounted_price_display', 'is_available')}),
+    # )
+
+    fields = ('name', 'description', 'category', 'sub_category', 'image', 'product_code', 
+              'price', 'discount_percent', 'discounted_price_display', 'is_available')
 class CartItemInline(admin.TabularInline):
     model = CartItem
     extra = 0
@@ -66,10 +69,16 @@ class CartAdmin(admin.ModelAdmin):
     inlines = [CartItemInline] # CartItem can we display here
 
 
+class SubCategoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'category')
+    list_filter = ('category',)
+    search_fields = ('name', 'category__name')
 
 #  Registering the Models
 admin.site.register(User, UserAdmin)
 admin.site.register(Category)
+admin.site.register(SubCategory)
+
 admin.site.register(Product, ProductAdmin) # ProductAdmin
 admin.site.register(Cart, CartAdmin)       # CartAdmin
 admin.site.register(CartItem)

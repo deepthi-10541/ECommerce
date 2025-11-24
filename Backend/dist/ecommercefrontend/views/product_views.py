@@ -1,9 +1,10 @@
 # ecommercefrontend/views/product_views.py
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.permissions import AllowAny 
 from rest_framework.response import Response
-from ..models import Product, Category
-from ..serializers.product_serializers import ProductSerializer, CategorySerializer
+from django.shortcuts import get_object_or_404
+from ..models import Product, Category, SubCategory
+from ..serializers.product_serializers import ProductSerializer, CategorySerializer, SubCategorySerializer
 
 # -----------------Product List View (Excludes Electronics) -----------------
 class ProductListView(generics.ListAPIView):
@@ -26,7 +27,7 @@ class ProductListView(generics.ListAPIView):
 
 # Category List View (Adding 'All' option)
 class CategoryListView(generics.ListAPIView):
-    queryset = Category.objects.all().order_by('name')
+    queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
 
@@ -49,8 +50,8 @@ class CategoryDetailView(generics.RetrieveAPIView):
 
 # Product Detail View (unchanged)
 class ProductDetailView(generics.RetrieveAPIView):
-    #(old ProductDetailView code)
     queryset = Product.objects.filter(is_available=True)
+    # queryset = Product.objects.all(is_available=True)
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     lookup_field = 'pk'
@@ -74,51 +75,57 @@ class ProductDetailView(generics.RetrieveAPIView):
 #             return Product.objects.none()
         
 
+# SubCategory-wise Product List View
+class SubCategoryProductsView(generics.ListAPIView):
+    serializer_class = ProductSerializer 
+    permission_classes = [AllowAny] 
+
+    def get_queryset(self):
+        sub_category_id = self.kwargs['sub_category_pk'] 
+        
+        queryset = Product.objects.filter(
+            sub_category__id=sub_category_id, 
+            is_available=True
+        ).order_by('product_code','id')
+        
+        return queryset
+
+# ----------------- Product Suggestions View (SubCategory Grouping) -----------------
 class ProductSuggestionsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny] 
 
     def get_queryset(self):
-        category_id = self.kwargs.get('category_pk')
-        product_identifier = self.kwargs.get('product_identifier') # '5' or '5.1'
+        # from url we taking product(example: '1.1.1', '1.2.5')
+        product_code = self.kwargs.get('product_code') 
 
-        if not product_identifier:
+        if not product_code or product_code.count('.') < 2: 
             return Product.objects.none()
         
         try:
-            # 1. Get the current product using the product_code (e.g., '5' or '5.1')
-            current_product = Product.objects.get(
-                product_code=product_identifier, 
-                category__id=category_id, 
+            current_product = get_object_or_404(
+                Product, 
+                product_code=product_code, 
                 is_available=True
             )
-            
             current_product_id = current_product.id
             
-            # 2. Filtering Logic for Suggestions
-            if '.' in product_identifier:
-                # Case: Sub-Product (e.g., 5.1). Find other variants in the 5-group (5.2, 5.3)
-                parent_code = product_identifier.split('.')[0] # Gets '5'
-                
-                # Filter for products in the same category whose product_code starts with '5'
-                queryset = Product.objects.filter(
-                    category=current_product.category,
-                    product_code__startswith=parent_code, 
-                    is_available=True
-                ).exclude(id=current_product_id) 
+            # SubCategory Identifier
+            sub_category_identifier = ".".join(product_code.split('.')[:-1]) 
             
-            else:
-                # Case: Main Product (e.g., 5). Find other products in the same category 
-                queryset = Product.objects.filter(
-                    category=current_product.category, 
-                    is_available=True
-                ).exclude(id=current_product_id) 
+            queryset = Product.objects.filter(
+                # product_code '1.1.' starting once(1.1.X)
+                product_code__startswith=sub_category_identifier + '.', 
+                is_available=True
+            ).exclude(id=current_product_id) 
             
             # 3. Limit to 10 Suggestions
-            return queryset[:10] 
+            return queryset.order_by('product_code')[:10] 
             
         except Product.DoesNotExist:
-            return Product.objects.none()      
+            return Product.objects.none() 
+
+   
 # Category-wise Product List View
 class CategoryProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer # Product details can display
@@ -130,8 +137,37 @@ class CategoryProductsView(generics.ListAPIView):
         queryset = Product.objects.filter(
             category__id=category_id, 
             is_available=True
-        ).order_by('name')
+        ).order_by('product_code', 'id')
         
         return queryset
+
+
+
+
+class SubCategoryListCreateAPIView(generics.ListCreateAPIView):
+    queryset = SubCategory.objects.all().select_related("category")
+    serializer_class = SubCategorySerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        base_qs = self.queryset
+        category_id = self.kwargs.get("category_pk")
         
+        if category_id:
+           return base_qs.filter(category_id=category_id)
         
+        return base_qs 
+        
+class SubCategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = SubCategory.objects.all().select_related("category")
+    serializer_class = SubCategorySerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        base_qs = self.queryset
+        category_id = self.kwargs.get("category_pk")
+        
+        if category_id:
+            return base_qs.filter(category_id=category_id)
+        
+        return base_qs  
