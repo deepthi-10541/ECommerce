@@ -1,10 +1,11 @@
 # ecommercefrontend/views/product_views.py
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, permissions
+
 from rest_framework.permissions import AllowAny 
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from ..models import Product, Category, SubCategory
-from ..serializers.product_serializers import ProductSerializer, CategorySerializer, SubCategorySerializer
+from ..serializers.product_serializers import ProductSerializer, CategorySerializer, SubCategorySerializer, SimpleCategorySerializer
 
 # -----------------Product List View (Excludes Electronics) -----------------
 class ProductListView(generics.ListAPIView):
@@ -41,6 +42,22 @@ class CategoryListView(generics.ListAPIView):
         category_list.extend(serializer.data)
         return Response(category_list)
     
+# class CategoryListView(generics.ListAPIView):
+#     queryset = Category.objects.all().order_by('id')
+#     serializer_class = SimpleCategorySerializer
+#     permission_classes = [AllowAny]
+
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.get_queryset()
+#         serializer = self.get_serializer(queryset, many=True)
+
+#         category_list = [
+#             {"id": 0, "name": "All"}
+#         ]
+#         category_list.extend(serializer.data)
+#         return Response(category_list)
+
+
 # Category Detail View (Single Category by ID)
 class CategoryDetailView(generics.RetrieveAPIView):
     queryset = Category.objects.all()
@@ -91,41 +108,78 @@ class SubCategoryProductsView(generics.ListAPIView):
         return queryset
 
 # ----------------- Product Suggestions View (SubCategory Grouping) -----------------
-class ProductSuggestionsView(generics.ListAPIView):
-    serializer_class = ProductSerializer
-    permission_classes = [AllowAny] 
+# class ProductSuggestionsView(generics.ListAPIView):
+#     serializer_class = ProductSerializer
+#     permission_classes = [AllowAny] 
 
-    def get_queryset(self):
-        # from url we taking product(example: '1.1.1', '1.2.5')
-        product_code = self.kwargs.get('product_code') 
+#     def get_queryset(self):
+#         # from url we taking product(example: '1.1.1', '1.2.5')
+#         product_code = self.kwargs.get('product_code') 
 
-        if not product_code or product_code.count('.') < 2: 
-            return Product.objects.none()
+#         if not product_code or product_code.count('.') < 2: 
+#             return Product.objects.none()
         
-        try:
-            current_product = get_object_or_404(
-                Product, 
-                product_code=product_code, 
-                is_available=True
-            )
-            current_product_id = current_product.id
+#         try:
+#             current_product = get_object_or_404(
+#                 Product, 
+#                 product_code=product_code, 
+#                 is_available=True
+#             )
+#             current_product_id = current_product.id
             
-            # SubCategory Identifier
-            sub_category_identifier = ".".join(product_code.split('.')[:-1]) 
+#             # SubCategory Identifier
+#             sub_category_identifier = ".".join(product_code.split('.')[:-1]) 
             
-            queryset = Product.objects.filter(
-                # product_code '1.1.' starting once(1.1.X)
-                product_code__startswith=sub_category_identifier + '.', 
-                is_available=True
-            ).exclude(id=current_product_id) 
+#             queryset = Product.objects.filter(
+#                 # product_code '1.1.' starting once(1.1.X)
+#                 product_code__startswith=sub_category_identifier + '.', 
+#                 is_available=True
+#             )
+#                 # .exclude(id=current_product_id)
             
-            # 3. Limit to 10 Suggestions
-            return queryset.order_by('product_code')[:10] 
+#             # 3. Limit to 10 Suggestions
+#             return queryset.order_by('product_code')[:10] 
             
-        except Product.DoesNotExist:
-            return Product.objects.none() 
+#         except Product.DoesNotExist:
+#             return Product.objects.none() 
 
    
+
+class ProductSuggestionsView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        product_code = self.kwargs.get('product_code')
+
+        if not product_code:
+            return Product.objects.none()
+
+        # If it's a full product code with 2 dots (like 1.2.1)
+        if product_code.count('.') == 2:
+            current_product = Product.objects.filter(
+                product_code=product_code,
+                is_available=True
+            ).first()
+            if current_product:
+                sub_category_identifier = ".".join(product_code.split('.')[:-1])
+                return Product.objects.filter(
+                    product_code__startswith=sub_category_identifier + '.',
+                    is_available=True
+                ).order_by('product_code')
+
+            return Product.objects.none()
+
+        # If it's a subcategory code with 1 dot (like 1.2)
+        elif product_code.count('.') == 1:
+            return Product.objects.filter(
+                product_code__startswith=product_code + '.',
+                is_available=True
+            ).order_by('product_code')
+
+        return Product.objects.none()
+
+
 # Category-wise Product List View
 class CategoryProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer # Product details can display
@@ -158,16 +212,101 @@ class SubCategoryListCreateAPIView(generics.ListCreateAPIView):
         
         return base_qs 
         
-class SubCategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = SubCategory.objects.all().select_related("category")
+# class SubCategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = SubCategory.objects.all().select_related("category")
+#     serializer_class = SubCategorySerializer
+#     permission_classes = [AllowAny]
+
+#     def get_queryset(self):
+#         base_qs = self.queryset
+#         category_id = self.kwargs.get("category_pk")
+        
+#         if category_id:
+#             return base_qs.filter(category_id=category_id)
+        
+#         return base_qs  
+
+
+class SubCategoryListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = SubCategorySerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        base_qs = self.queryset
         category_id = self.kwargs.get("category_pk")
-        
         if category_id:
-            return base_qs.filter(category_id=category_id)
-        
-        return base_qs  
+            return SubCategory.objects.filter(category_id=category_id)
+        return SubCategory.objects.all()
+
+    def perform_create(self, serializer):
+        category_id = self.kwargs.get("category_pk")
+        serializer.save(category_id=category_id)
+    
+class CategoryRetrieveView(generics.RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer 
+    permission_classes = [AllowAny]
+    lookup_field = 'pk'
+
+
+# Admin-only product creation
+class ProductCreateAPIView(generics.CreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    # permission_classes = [permissions.IsAdminUser]  # Only admin can add
+    permission_classes = [permissions.IsAuthenticated] 
+
+
+
+class ProductTreeView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        code = self.kwargs.get("product_code")
+
+        # Level: Category -> "1"
+        if code.isdigit():
+            category = Category.objects.filter(id=code).first()
+            if not category:
+                return Response({"error": "Invalid category code"}, status=404)
+
+            subcats = SubCategory.objects.filter(category_id=code)
+            return Response({
+                "level": "category",
+                "category_name": category.name,
+                "next": [{"code": f"{category.id}.{i.id}", "name": i.name} for i in subcats]
+            })
+
+        # Level: SubCategory -> "1.2"
+        if code.count('.') == 1:
+            try:
+                cat, sub = code.split('.')
+                subcategory = SubCategory.objects.get(id=sub, category_id=cat)
+
+                products = Product.objects.filter(sub_category_id=subcategory.id, is_available=True)
+                return Response({
+                    "level": "subcategory",
+                    "subcategory_name": subcategory.name,
+                    "products": ProductSerializer(products, many=True).data
+                })
+            except:
+                return Response({"error": "Invalid subcategory code"}, status=404)
+
+        # Level: Product Group -> "1.2.1"
+        if code.count('.') == 2:
+            products = Product.objects.filter(product_code__startswith=code, is_available=True)
+
+            if not products.exists():
+                return Response({"error": "Invalid product code"}, status=404)
+
+            return Response({
+                "level": "product-group",
+                "products": ProductSerializer(products, many=True).data
+            })
+
+        return Response({"error": "Invalid format"}, status=400)
+
+
+
+
+

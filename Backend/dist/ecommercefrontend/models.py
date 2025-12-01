@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from decimal import Decimal
 
 class UserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
@@ -67,7 +68,8 @@ class Category(models.Model):
         return self.name
     
 class SubCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="subcategories")
+    # category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="subcategories")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='nested_subs')
     name = models.CharField(max_length=150)
     image = models.ImageField(upload_to="sub-category/", blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -105,14 +107,24 @@ class Product(models.Model):
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # def discount_price(self):
+    #     if self.discount_percent is not None and self.discount_percent > 0:
+    #         discount_amount = self.price * (self.discount_percent / 100)
+    #         return self.price - discount_amount
+    #     return self.price
+
+    # def __str__(self):
+    #     return self.name
+
     def discount_price(self):
-        if self.discount_percent is not None and self.discount_percent > 0:
-            discount_amount = self.price * (self.discount_percent / 100)
+        if self.discount_percent is not None and Decimal(self.discount_percent) > 0:
+            discount_percent = Decimal(self.discount_percent) / Decimal("100")
+            discount_amount = self.price * discount_percent
             return self.price - discount_amount
         return self.price
-
-    def __str__(self):
-        return self.name
+    
+    class Meta:
+        unique_together = ('name', 'sub_category')  # Prevent duplicates
     
 # --- 5. Cart, CartItem Models ---
 class Cart(models.Model):

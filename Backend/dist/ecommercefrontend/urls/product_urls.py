@@ -1,18 +1,23 @@
 from django.urls import path
 from ecommercefrontend.views.product_views import( 
   ProductListView, ProductDetailView, CategoryListView, ProductSuggestionsView, 
-  CategoryDetailView, CategoryProductsView, SubCategoryDetailAPIView, 
-  SubCategoryListCreateAPIView, SubCategoryProductsView
+  CategoryDetailView, CategoryProductsView, SubCategoryListCreateAPIView, 
+  SubCategoryListCreateAPIView, SubCategoryProductsView, CategoryRetrieveView, ProductCreateAPIView, ProductTreeView
 )
 urlpatterns = [
     # GET: /products/list/ 
     path('products/list/', ProductListView.as_view()),
-    
+
+    path('products/add/', ProductCreateAPIView.as_view(), name='product-add'),
+
+    path('products/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
+
     # GET: /products/categories/
     path('products/categories/', CategoryListView.as_view()), # Category List
 
     # GET: /products/categories/<id>/
-    path('products/categories/<int:pk>/', CategoryDetailView.as_view()),
+    path('products/categories/<int:pk>/', CategoryRetrieveView.as_view()), # Category Details (ID)
+    path('categories/<int:pk>/', CategoryRetrieveView.as_view()),
 
     # GET: /products/category-products/<id>/ (Category ID 1 inside product)
     path('products/category-products/<int:pk>/', CategoryProductsView.as_view()),
@@ -24,17 +29,17 @@ urlpatterns = [
     
     # GET: /products/categories/1/sub-categories/ (Category ID 1 lo SubCategory)
     path(
-        'products/categories/<int:category_pk>/sub-categories/', 
-        SubCategoryListCreateAPIView.as_view(), 
-        name='category-subcategories-list'
-    ),
+        'products/categories/<int:category_pk>/sub-categories/', SubCategoryListCreateAPIView.as_view(), name='category-subcategories-list'),
     
     # GET: /products/sub-categories/<id>/ ( single SubCategory details)
-    path(
-        'products/sub-categories/<int:pk>/', 
-        SubCategoryDetailAPIView.as_view(), 
-        name='subcategory-detail'
-    ),
+    # path(
+    #     'products/sub-categories/<int:pk>/', 
+    #     SubCategoryDetailAPIView.as_view(), 
+    #     name='subcategory-detail'
+    # ),
+
+    path('categories/<int:category_pk>/sub-categories/', SubCategoryListCreateAPIView.as_view(), name='subcategories'),
+
 
     # -------------------- SubCategory Products & Suggestions --------------------
     
