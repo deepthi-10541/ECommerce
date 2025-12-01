@@ -10,7 +10,7 @@ urlpatterns = [
 
     path('products/add/', ProductCreateAPIView.as_view(), name='product-add'),
 
-    path('products/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
+    path('products/tree/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
 
     # GET: /products/categories/
     path('products/categories/', CategoryListView.as_view()), # Category List
