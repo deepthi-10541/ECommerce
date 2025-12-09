@@ -22,6 +22,8 @@ urlpatterns = [
     # GET: /products/category-products/<id>/ (Category ID 1 inside product)
     path('products/category-products/<int:pk>/', CategoryProductsView.as_view()),
 
+    path('products/categories/<int:category_pk>/', CategoryTreeView.as_view(), name='category-detail'),
+
     path('products/categories/<int:category_pk>/<int:sub_category_pk>/', CategoryTreeView.as_view(), name='subcategory-detail'),
 
     path('products/categories/<int:category_pk>/<int:sub_category_pk>/<int:product_pk>/', CategoryTreeView.as_view(), name='product-detail'),
