@@ -4,7 +4,7 @@ from ecommercefrontend.views.cart_views import AddToCartView, CartDetailView
 
 urlpatterns = [
     # POST: /api/cart/add/
-    path('cart/add/', AddToCartView.as_view()),
+    path('add/', AddToCartView.as_view()),
     # GET: /api/cart/details/
     path('details/', CartDetailView.as_view()),
 ]

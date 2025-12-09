@@ -51,12 +51,28 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 # 
 # 3. CategorySerializer
+# class CategorySerializer(serializers.ModelSerializer):
+#     subcategories = SubCategorySerializer(many=True, read_only=True, source='nested_subs') 
+
+#     class Meta:
+#         model = Category
+#         fields = ['id', 'name', 'subcategories']
+
+
+
 class CategorySerializer(serializers.ModelSerializer):
-    subcategories = SubCategorySerializer(many=True, read_only=True, source='nested_subs') 
+    subcategories = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'subcategories']
+        fields = "__all__"
+
+    def get_subcategories(self, obj):
+        subcats = SubCategory.objects.filter(category=obj).order_by("id")
+        return SubCategorySerializer(subcats, many=True).data
+
+
+
 
 
 class SimpleCategorySerializer(serializers.ModelSerializer):

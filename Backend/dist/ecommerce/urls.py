@@ -29,6 +29,6 @@ urlpatterns = [
     path('', include('ecommercefrontend.urls.product_urls')),
     
     # Cart URLs
-    path('', include('ecommercefrontend.urls.cart_urls')),
+    path('cart/', include('ecommercefrontend.urls.cart_urls')),
 ]
 

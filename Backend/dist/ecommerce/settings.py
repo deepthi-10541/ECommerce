@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-l=+!)i&+)-%464-%8fxjpr_hvx(4ndonl0)_yo338ro$uci5i!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -77,6 +77,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
+# CORS_ALLOW_CREDENTIALS = True
+
 
 
 # Database
@@ -145,6 +147,8 @@ AUTH_USER_MODEL = 'ecommercefrontend.User'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://192.168.0.25:8000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True

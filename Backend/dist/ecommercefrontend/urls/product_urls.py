@@ -2,7 +2,7 @@ from django.urls import path
 from ecommercefrontend.views.product_views import( 
   ProductListView, ProductDetailView, CategoryListView, ProductSuggestionsView, 
   CategoryDetailView, CategoryProductsView, SubCategoryListCreateAPIView, 
-  SubCategoryListCreateAPIView, SubCategoryProductsView, CategoryRetrieveView, ProductCreateAPIView, ProductTreeView
+  SubCategoryListCreateAPIView, SubCategoryProductsView, CategoryRetrieveView, ProductCreateAPIView, CategoryTreeView
 )
 urlpatterns = [
     # GET: /products/list/ 
@@ -10,17 +10,21 @@ urlpatterns = [
 
     path('products/add/', ProductCreateAPIView.as_view(), name='product-add'),
 
-    path('products/tree/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
+    # path('products/tree/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
 
     # GET: /products/categories/
     path('products/categories/', CategoryListView.as_view()), # Category List
 
     # GET: /products/categories/<id>/
-    path('products/categories/<int:pk>/', CategoryRetrieveView.as_view()), # Category Details (ID)
-    path('categories/<int:pk>/', CategoryRetrieveView.as_view()),
+    # path('products/categories/<int:pk>/', CategoryRetrieveView.as_view()), # Category Details (ID)
+    # path('categories/<int:pk>/', CategoryRetrieveView.as_view()),
 
     # GET: /products/category-products/<id>/ (Category ID 1 inside product)
     path('products/category-products/<int:pk>/', CategoryProductsView.as_view()),
+
+    path('products/categories/<int:category_pk>/<int:sub_category_pk>/', CategoryTreeView.as_view(), name='subcategory-detail'),
+
+    path('products/categories/<int:category_pk>/<int:sub_category_pk>/<int:product_pk>/', CategoryTreeView.as_view(), name='product-detail'),
 
     # GET: /products/<id>/
     path('products/<int:pk>/', ProductDetailView.as_view()),
@@ -44,18 +48,14 @@ urlpatterns = [
     # -------------------- SubCategory Products & Suggestions --------------------
     
     # SubCategory inside Products (SubCategory ID directly can we use)
-    # GET: /products/sub-category-products/1/ (SubCategory ID 1 లోని Products)
+    # GET: /products/sub-category-products/1/ (SubCategory ID 1 Products)
     path(
-        'products/sub-category-products/<int:sub_category_pk>/', 
-        SubCategoryProductsView.as_view(), 
-        name='subcategory-products'
+        'products/sub-category-products/<int:sub_category_pk>/', SubCategoryProductsView.as_view(), name='subcategory-products'
     ),
 
     # SubCategory lo Product Suggestions (e.g., product_code 1.1.1)
     # GET: /products/sub-category-suggestions/<str:product_code>/
     path(
-        'products/sub-category-suggestions/<str:product_code>/', 
-        ProductSuggestionsView.as_view(), 
-        name='subcategory-suggestions'
+        'products/sub-category-suggestions/<str:product_code>/', ProductSuggestionsView.as_view(), name='subcategory-suggestions'
     ),
 ]
