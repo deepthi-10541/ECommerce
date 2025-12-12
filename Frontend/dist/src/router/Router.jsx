@@ -3,21 +3,23 @@ import { useSelector } from "react-redux";
 import Login from "../views/pages/login";
 import Navbar from "../Components/Navbar";
 import Banner from "../Components/Banner";
-import Fruits from "../Components/Fruits";
-import Beauty from "../Components/Beauty";
-import MensCollection from "../Components/MensCollection";
-import TechProducts from "../Components/TechProducts";
+
+import HomePage from '../Components/HomePage';
 import HeroCards from "../Components/HeroCards";
+
+// ✅ Import Sidebar
+import ProfileSidebar from "../views/pages/ProfileSidebar";
 
 function AppLayout() {
   return (
     <>
       <Navbar />
+
+      {/* 👇 Profile Sidebar should load globally for logged-in users */}
+      <ProfileSidebar />
+
       <Banner />
-      <Fruits />
-      <Beauty />
-      <MensCollection />
-      <TechProducts />
+          <HomePage />
       <HeroCards />
     </>
   );
@@ -26,7 +28,7 @@ function AppLayout() {
 function Router() {
   const user = useSelector((state) => state.auth.user);
 
-  // 👇 This decides what to show based on Redux
+  // 👇 Routing based on login
   return user ? <AppLayout /> : <Login />;
 }
 

@@ -1,55 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../Styles/Navbar.css";
 import Fresh from "../assets/images/Fresh.png";
 import { Search, ShoppingCart, MapPin, Package, User } from "react-feather";
-import {
-  FaAppleAlt,
-  FaCarrot,
-  FaStore,
-  FaBreadSlice,
-  FaGlassWhiskey,
-  FaSpa,
-  FaHeartbeat,
-  FaSun,
-  FaThLarge,
-  FaLaptop,
-} from "react-icons/fa";
+import * as Icons from "react-icons/fa";
+
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
+
+import { fetchCategories, selectCategory } from "../redux/categoriesSlice";
+import { openSidebar } from "../redux/profileSlice";
+
 import { useNavigate } from "react-router-dom";
 
-function Navbar() {
-  const categories = [
-    { name: "All Categories", icon: <FaThLarge /> },
-    { name: "Fruits", icon: <FaAppleAlt /> },
-    { name: "Vegetables", icon: <FaCarrot /> },
-    { name: "Grocery", icon: <FaStore /> },
-    { name: "Bakery & Pastry", icon: <FaBreadSlice /> },
-    { name: "Beverages", icon: <FaGlassWhiskey /> },
-    { name: "Beauty", icon: <FaSpa /> },
-    { name: "Health and Wellness", icon: <FaHeartbeat /> },
-    { name: "Tech", icon: <FaLaptop /> },
-    { name: "Summer Deals", icon: <FaSun /> },
-  ];
+const iconList = [
+  "FaAppleAlt",
+  "FaCarrot",
+  "FaStore",
+  "FaBreadSlice",
+  "FaGlassWhiskey",
+  "FaSpa",
+  "FaHeartbeat",
+  "FaLaptop",
+  "FaSun",
+  "FaThLarge",
+];
 
-  const { user } = useSelector((state) => state.auth);
+function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [showLogout, setShowLogout] = useState(false);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
-  };
+  // Get categories from Redux store
+  const { list: categories, loading, error } = useSelector(
+    (state) => state.categories
+  );
 
+  const { user } = useSelector((state) => state.auth);
+
+  // Fetch categories on load
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  // Open profile sidebar or navigate to login
   const handleUserClick = () => {
-    if (!user) return;
-    setShowLogout(true);
-    setTimeout(() => setShowLogout(false), 3000);
+    if (!user) {
+      navigate("/login");
+    } else {
+      dispatch(openSidebar()); // open profile sidebar
+    }
   };
 
   return (
     <nav className="navbar">
+      {/* ---------------- TOP NAVBAR ---------------- */}
       <div className="navbar-top">
         <div className="navbar-left">
           <img src={Fresh} alt="FreshiMart" className="logo" />
@@ -66,6 +69,8 @@ function Navbar() {
               <p className="delivery-address">Enter your address</p>
             </div>
           </div>
+
+          {/* Search Bar */}
           <div className="search-bar">
             <Search className="search-icon" />
             <input type="text" placeholder="Search for products..." />
@@ -83,6 +88,7 @@ function Navbar() {
             <p>My Cart</p>
           </div>
 
+          {/* User Account Section */}
           <div className="account" style={{ position: "relative" }}>
             <div className="user-block" onClick={handleUserClick}>
               <div className="user-icon">
@@ -90,23 +96,38 @@ function Navbar() {
               </div>
               <span className="username">{user ? user : "Log in"}</span>
             </div>
-
-            {showLogout && user && (
-              <button className="logout-btn" onClick={handleLogout}>
-                Logout
-              </button>
-            )}
           </div>
         </div>
       </div>
 
+      {/* ---------------- CATEGORY NAVBAR ---------------- */}
       <div className="category-bar">
-        {categories.map((cat, i) => (
-          <button key={i} className="category-btn">
-            <span className="category-icon">{cat.icon}</span>
-            {cat.name}
-          </button>
-        ))}
+        {loading && (
+          <p className="loading-text" style={{ marginLeft: "20px" }}>
+            Loading categories...
+          </p>
+        )}
+
+        {error && (
+          <p style={{ color: "red", marginLeft: "20px" }}>
+            {error}
+          </p>
+        )}
+
+        {!loading &&
+          !error &&
+          categories.map((cat, index) => (
+            <button
+              key={cat.id}
+              className="category-btn"
+              onClick={() => dispatch(selectCategory(cat.id))}
+            >
+              <span className="category-icon">
+                {React.createElement(Icons[iconList[index % iconList.length]])}
+              </span>
+              {cat.name}
+            </button>
+          ))}
       </div>
     </nav>
   );

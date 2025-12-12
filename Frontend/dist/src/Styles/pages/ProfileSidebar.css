@@ -1,0 +1,173 @@
+/* ------------------- OVERLAY ------------------- */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  z-index: 999;
+}
+
+.show-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ------------------- SIDEBAR ------------------- */
+.profile-sidebar {
+  position: fixed;
+  top: 0;
+  right: -420px; /* compact width */
+  width: 360px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  border-left: 2px solid #f0f0f0;
+  transition: right 0.35s ease;
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.profile-sidebar.open {
+  right: 0;
+}
+
+/* ------------------- CONTENT ------------------- */
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* CLOSE BUTTON */
+.sidebar-close-icon {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #444;
+}
+
+.sidebar-close-icon:hover {
+  color: #2d9c7a;
+}
+
+/* HEADER */
+.sidebar-content h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 35px;
+  margin-bottom: 15px;
+  color: #222;
+  border-left: 4px solid #2d9c7a;
+  padding-left: 10px;
+}
+
+/* ------------------- INPUT FIELDS ------------------- */
+.input-fields {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.input-fields label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #444;
+}
+
+.input-fields input,
+.dropdown-input {
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  transition: 0.2s;
+  font-size: 14px;
+}
+
+.input-fields input:focus,
+.dropdown-input:focus {
+  border-color: #2d9c7a;
+  box-shadow: 0 0 5px rgba(45, 156, 122, 0.3);
+  outline: none;
+}
+
+/* DROPDOWN */
+.dropdown-input {
+  background: #fff;
+  cursor: pointer;
+}
+
+.dropdown-input option {
+  padding: 10px;
+}
+
+/* ------------------- ERROR MESSAGE ------------------- */
+.error-text {
+  color: #ff4d4d;
+  font-size: 12px;
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+/* ------------------- BUTTONS ------------------- */
+.sidebar-buttons {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SAVE BUTTON */
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  background: #2d9c7a;
+  color: white;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.save-btn:hover {
+  background: #248868;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+  width: 100%;
+  padding: 12px;
+  background: #ff4d4d;
+  color: white;
+  font-size: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: #e43c3c;
+}
+
+/* ------------------- SCROLLBAR ------------------- */
+.profile-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-sidebar::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}

@@ -2,7 +2,13 @@
   "auth": {
     "send_otp": "/send-otp/",
     "verify_otp": "/verify-otp/"
+  },
+
+  "profile": {
+    "complete_profile": "/profile-complete/"
+  },
+  "products":{
+    "categories": "/products/categories/"
   }
+
 }
-
-

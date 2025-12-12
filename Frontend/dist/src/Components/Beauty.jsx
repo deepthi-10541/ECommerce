@@ -15,6 +15,8 @@ function Beauty() {
       .catch((error) => console.error("Error fetching beauty products:", error));
   }, []);
 
+
+  
   const cardWidth = 180;
   const viewportWidth = window.innerWidth - 40;
   const cardsInRow = Math.floor(viewportWidth / (cardWidth + 20));

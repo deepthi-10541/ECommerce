@@ -260,7 +260,7 @@
 }
 
 /* Logout button styling */
-.logout-btn {
+/* .logout-btn {
   position: absolute;
   top: 60px;
   background: #fff;
@@ -277,7 +277,7 @@
   background-color: #2ca44f;
   color: #fff;
   border-color: #2ca44f;
-}
+} */
 
 /* ---------- Responsive ---------- */
 @media (max-width: 480px) {
