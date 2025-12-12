@@ -34,8 +34,7 @@ urlpatterns = [
     # -------------------- SubCategory Endpoints --------------------
     
     # GET: /products/categories/1/sub-categories/ (Category ID 1 lo SubCategory)
-    path(
-        'products/categories/<int:category_pk>/sub-categories/', SubCategoryListCreateAPIView.as_view(), name='category-subcategories-list'),
+    path('products/categories/<int:category_pk>/sub-categories/', SubCategoryListCreateAPIView.as_view(), name='category-subcategories-list'),
     
     # GET: /products/sub-categories/<id>/ ( single SubCategory details)
     # path('products/sub-categories/<int:pk>/', SubCategoryDetailAPIView.as_view(), name='subcategory-detail'),
@@ -47,13 +46,9 @@ urlpatterns = [
     
     # SubCategory inside Products (SubCategory ID directly can we use)
     # GET: /products/sub-category-products/1/ (SubCategory ID 1 Products)
-    path(
-        'products/sub-category-products/<int:sub_category_pk>/', SubCategoryProductsView.as_view(), name='subcategory-products'
-    ),
+    path('products/sub-category-products/<int:sub_category_pk>/', SubCategoryProductsView.as_view(), name='subcategory-products'),
 
     # SubCategory lo Product Suggestions (e.g., product_code 1.1.1)
     # GET: /products/sub-category-suggestions/<str:product_code>/
-    path(
-        'products/sub-category-suggestions/<str:product_code>/', ProductSuggestionsView.as_view(), name='subcategory-suggestions'
-    ),
+    path('products/sub-category-suggestions/<str:product_code>/', ProductSuggestionsView.as_view(), name='subcategory-suggestions'),
 ]
