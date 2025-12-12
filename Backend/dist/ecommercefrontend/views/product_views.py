@@ -241,11 +241,11 @@ class SubCategoryListCreateAPIView(generics.ListCreateAPIView):
         category_id = self.kwargs.get("category_pk")
         serializer.save(category_id=category_id)
     
-class CategoryRetrieveView(generics.RetrieveAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer 
-    permission_classes = [AllowAny]
-    lookup_field = 'pk'
+# class CategoryRetrieveView(generics.RetrieveAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer 
+#     permission_classes = [AllowAny]
+#     lookup_field = 'pk'
 
 
 # Admin-only product creation
@@ -257,136 +257,84 @@ class ProductCreateAPIView(generics.CreateAPIView):
 
 
 
-# class ProductTreeView(generics.ListAPIView):
-#     serializer_class = ProductSerializer
-#     permission_classes = [AllowAny]
+class ProductTreeView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
 
-#     def get(self, request, *args, **kwargs):
-#         code = self.kwargs.get("product_code")
+    def get(self, request, *args, **kwargs):
+        code = self.kwargs.get("product_code")
 
-#         # Level: Category -> "1"
-#         if code.isdigit():
-#             category = Category.objects.filter(id=code).first()
-#             if not category:
-#                 return Response({"error": "Invalid category code"}, status=404)
+        # ---------------- CATEGORY LEVEL ("1" ) ----------------
+        if code.isdigit():
+            category = Category.objects.filter(id=code).first()
+            if not category:
+                return Response({"error": "Invalid category code"}, status=404)
 
-#             subcats = SubCategory.objects.filter(category_id=code)
-#             return Response({
-#                 "level": "category",
-#                 "category_name": category.name,
-#                 "next": [{"code": f"{category.id}.{i.id}", "name": i.name} for i in subcats]
-#             })
+            subcats = SubCategory.objects.filter(category_id=category.id).order_by("id")
 
-#         # Level: SubCategory -> "1.2"
-#         if code.count('.') == 1:
-#             try:
-#                 cat, sub = code.split('.')
-#                 subcategory = SubCategory.objects.get(id=sub, category_id=cat)
+            next_items = [
+                {"code": f"{category.id}.{s.id}", "name": s.name}
+                for s in subcats
+            ]
 
-#                 products = Product.objects.filter(sub_category_id=subcategory.id, is_available=True)
-#                 return Response({
-#                     "level": "subcategory",
-#                     "subcategory_name": subcategory.name,
-#                     "products": ProductSerializer(products, many=True).data
-#                 })
-#             except:
-#                 return Response({"error": "Invalid subcategory code"}, status=404)
+            # Sort codes so they are always in correct order
+            next_items = sorted(next_items, key=lambda x: int(x["code"].split(".")[-1]))
 
-#         # Level: Product Group -> "1.2.1"
-#         if code.count('.') == 2:
-#             products = Product.objects.filter(product_code__startswith=code, is_available=True)
+            return Response({
+                "level": "category",
+                "category_name": category.name,
+                # "next": next_items
+                "next": [{"id": i.id, "code": f"{category.id}.{i.id}", "name": i.name} for i in subcats]
 
-#             if not products.exists():
-#                 return Response({"error": "Invalid product code"}, status=404)
+            })
 
-#             return Response({
-#                 "level": "product-group",
-#                 "products": ProductSerializer(products, many=True).data
-#             })
+        # ---------------- SUBCATEGORY LEVEL ("1.2" ) ----------------
+        if code.count('.') == 1:
+            try:
+                category_id, sub_id = code.split('.')
+                subcategory = SubCategory.objects.get(id=sub_id, category_id=category_id)
 
-#         return Response({"error": "Invalid format"}, status=400)
+                products = Product.objects.filter(
+                    sub_category_id=subcategory.id,
+                    is_available=True
+                ).order_by("id")
 
+                # Sorting products by product_code (1.2.1, 1.2.2, 1.2.3)
+                sorted_products = sorted(
+                    products,
+                    key=lambda p: [int(x) for x in p.product_code.split(".")]
+                )
 
+                return Response({
+                    "level": "subcategory",
+                    "subcategory_name": subcategory.name,
+                    "products": ProductSerializer(sorted_products, many=True).data
+                })
 
-# class ProductTreeView(generics.ListAPIView):
-#     serializer_class = ProductSerializer
-#     permission_classes = [AllowAny]
+            except SubCategory.DoesNotExist:
+                return Response({"error": "Invalid subcategory code"}, status=404)
 
-#     def get(self, request, *args, **kwargs):
-#         code = self.kwargs.get("product_code")
+        # ---------------- PRODUCT GROUP LEVEL ("1.2.1" ) ----------------
+        if code.count('.') == 2:
+            products = Product.objects.filter(
+                product_code__startswith=code,
+                is_available=True
+            ).order_by("id")
 
-#         # ---------------- CATEGORY LEVEL ("1" ) ----------------
-#         if code.isdigit():
-#             category = Category.objects.filter(id=code).first()
-#             if not category:
-#                 return Response({"error": "Invalid category code"}, status=404)
+            if not products.exists():
+                return Response({"error": "Invalid product code"}, status=404)
 
-#             subcats = SubCategory.objects.filter(category_id=category.id).order_by("id")
+            sorted_products = sorted(
+                products,
+                key=lambda p: [int(x) for x in p.product_code.split(".")]
+            )
 
-#             next_items = [
-#                 {"code": f"{category.id}.{s.id}", "name": s.name}
-#                 for s in subcats
-#             ]
+            return Response({
+                "level": "product-group",
+                "products": ProductSerializer(sorted_products, many=True).data
+            })
 
-#             # Sort codes so they are always in correct order
-#             next_items = sorted(next_items, key=lambda x: int(x["code"].split(".")[-1]))
-
-#             return Response({
-#                 "level": "category",
-#                 "category_name": category.name,
-#                 # "next": next_items
-#                 "next": [{"id": i.id, "code": f"{category.id}.{i.id}", "name": i.name} for i in subcats]
-
-#             })
-
-#         # ---------------- SUBCATEGORY LEVEL ("1.2" ) ----------------
-#         if code.count('.') == 1:
-#             try:
-#                 category_id, sub_id = code.split('.')
-#                 subcategory = SubCategory.objects.get(id=sub_id, category_id=category_id)
-
-#                 products = Product.objects.filter(
-#                     sub_category_id=subcategory.id,
-#                     is_available=True
-#                 ).order_by("id")
-
-#                 # Sorting products by product_code (1.2.1, 1.2.2, 1.2.3)
-#                 sorted_products = sorted(
-#                     products,
-#                     key=lambda p: [int(x) for x in p.product_code.split(".")]
-#                 )
-
-#                 return Response({
-#                     "level": "subcategory",
-#                     "subcategory_name": subcategory.name,
-#                     "products": ProductSerializer(sorted_products, many=True).data
-#                 })
-
-#             except SubCategory.DoesNotExist:
-#                 return Response({"error": "Invalid subcategory code"}, status=404)
-
-#         # ---------------- PRODUCT GROUP LEVEL ("1.2.1" ) ----------------
-#         if code.count('.') == 2:
-#             products = Product.objects.filter(
-#                 product_code__startswith=code,
-#                 is_available=True
-#             ).order_by("id")
-
-#             if not products.exists():
-#                 return Response({"error": "Invalid product code"}, status=404)
-
-#             sorted_products = sorted(
-#                 products,
-#                 key=lambda p: [int(x) for x in p.product_code.split(".")]
-#             )
-
-#             return Response({
-#                 "level": "product-group",
-#                 "products": ProductSerializer(sorted_products, many=True).data
-#             })
-
-#         return Response({"error": "Invalid format"}, status=400)
-
+        return Response({"error": "Invalid format"}, status=400)
 
 
 class CategoryTreeView(generics.GenericAPIView):

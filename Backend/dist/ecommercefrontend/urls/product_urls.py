@@ -2,7 +2,7 @@ from django.urls import path
 from ecommercefrontend.views.product_views import( 
   ProductListView, ProductDetailView, CategoryListView, ProductSuggestionsView, 
   CategoryDetailView, CategoryProductsView, SubCategoryListCreateAPIView, 
-  SubCategoryListCreateAPIView, SubCategoryProductsView, CategoryRetrieveView, ProductCreateAPIView, CategoryTreeView
+  SubCategoryListCreateAPIView, SubCategoryProductsView, ProductCreateAPIView, CategoryTreeView, ProductTreeView
 )
 urlpatterns = [
     # GET: /products/list/ 
@@ -10,7 +10,7 @@ urlpatterns = [
 
     path('products/add/', ProductCreateAPIView.as_view(), name='product-add'),
 
-    # path('products/tree/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
+    path('products/tree/<str:product_code>/', ProductTreeView.as_view(), name='product-tree'),
 
     # GET: /products/categories/
     path('products/categories/', CategoryListView.as_view()), # Category List
@@ -20,7 +20,7 @@ urlpatterns = [
     # path('categories/<int:pk>/', CategoryRetrieveView.as_view()),
 
     # GET: /products/category-products/<id>/ (Category ID 1 inside product)
-    path('products/category-products/<int:pk>/', CategoryProductsView.as_view()),
+    # path('products/category-products/<int:pk>/', CategoryProductsView.as_view()),
 
     path('products/categories/<int:category_pk>/', CategoryTreeView.as_view(), name='category-detail'),
 
@@ -38,11 +38,7 @@ urlpatterns = [
         'products/categories/<int:category_pk>/sub-categories/', SubCategoryListCreateAPIView.as_view(), name='category-subcategories-list'),
     
     # GET: /products/sub-categories/<id>/ ( single SubCategory details)
-    # path(
-    #     'products/sub-categories/<int:pk>/', 
-    #     SubCategoryDetailAPIView.as_view(), 
-    #     name='subcategory-detail'
-    # ),
+    # path('products/sub-categories/<int:pk>/', SubCategoryDetailAPIView.as_view(), name='subcategory-detail'),
 
     path('categories/<int:category_pk>/sub-categories/', SubCategoryListCreateAPIView.as_view(), name='subcategories'),
 
