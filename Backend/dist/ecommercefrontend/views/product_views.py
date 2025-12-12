@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from ..models import Product, Category, SubCategory
+from rest_framework.parsers import MultiPartParser, FormParser
 from ..serializers.product_serializers import ProductSerializer, CategorySerializer, SubCategorySerializer, SimpleCategorySerializer
 
 # -----------------Product List View (Excludes Electronics) -----------------
@@ -249,12 +250,23 @@ class SubCategoryListCreateAPIView(generics.ListCreateAPIView):
 
 
 # Admin-only product creation
+# class ProductCreateAPIView(generics.CreateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     # permission_classes = [permissions.IsAdminUser]  # Only admin can add
+#     permission_classes = [permissions.IsAuthenticated] 
+
+
 class ProductCreateAPIView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    # permission_classes = [permissions.IsAdminUser]  # Only admin can add
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAuthenticated]
 
+    parser_classes = (MultiPartParser, FormParser)  
+
+    def perform_create(self, serializer):
+        image = self.request.FILES.get('image')     
+        serializer.save(image=image)
 
 
 class ProductTreeView(generics.ListAPIView):
@@ -367,6 +379,10 @@ class CategoryTreeView(generics.GenericAPIView):
             return Response(serializer.data)
 
         return Response({"error": "Invalid URL parameters"}, status=400)
+
+
+
+
 
 
 
