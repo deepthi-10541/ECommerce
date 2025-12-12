@@ -107,7 +107,7 @@
 .input-icon {
   position: absolute;
   top: 50%;
-  left: 16px;
+  left: 18px;
   transform: translateY(-50%);
   color: #999;
 }
@@ -231,4 +231,3 @@
     height: 100vh;
   }
 }
-
